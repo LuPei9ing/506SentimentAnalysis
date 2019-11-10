@@ -38,8 +38,8 @@ class NewsbankSpider(scrapy.Spider):
 
 
     # Pass your BU credentials
-    username = 'giorgos' #raw_input('BU Username: ')
-    password = '3169771wNygVYk' #raw_input('BU Password: ')
+    username = raw_input('BU Username: ')
+    password = raw_input('BU Password: ')
 
     # Login and start the session
     # We have to have enough wait time for all the redirections to take place, 
