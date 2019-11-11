@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from Scraper.items import Article
+from scrapy.exceptions import CloseSpider
 
 import re
+from datetime import datetime
 
 
 
@@ -16,8 +18,6 @@ class BostonHeraldSpider(scrapy.Spider):
 
 
 	def parse(self, response):
-		print('\n\n STARTING \n\n')
-
 		categories = response.css('ul#primary-menu ul.sub-menu li a::attr(href)').getall()
 
 		for category_url in categories:
@@ -31,8 +31,6 @@ class BostonHeraldSpider(scrapy.Spider):
 
 
 	def parse_categories(self, response):
-		print('\n\n PARSING CATEGORIES \n\n')
-
 		next_page = response.css('a.load-more::attr(href)').get()
 
 
@@ -62,14 +60,11 @@ class BostonHeraldSpider(scrapy.Spider):
 
 
 	def parse_article(self, response):
-		print('\n\n PARSING ARTICLE \n\n')
-
 		article = Article()
 
-		datetime = response.css('div.meta div.time time::attr(datetime)').getall()
+		scraped_datetime = response.css('div.meta div.time time::attr(datetime)').get()
 
-
-		if self.year_limit is not None and int(datetime[0].split('-')[0]) < self.year_limit:
+		if self.year_limit is not None and int(scraped_datetime.split('-')[0]) < self.year_limit:
 			raise CloseSpider('Reached Year Limit')
 
 
@@ -77,7 +72,7 @@ class BostonHeraldSpider(scrapy.Spider):
 		
 		article['title'] = response.css('head title::text').get()
 		
-		article['date'] = datetime
+		article['date'] = str(datetime.strptime(scraped_datetime, '%Y-%d-%m %H:%M:%S'))
 		
 		article['journal'] = 'Boston Herald'
 
