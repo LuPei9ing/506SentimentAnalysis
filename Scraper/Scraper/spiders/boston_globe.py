@@ -2,8 +2,10 @@
 import scrapy
 from scrapy_splash import SplashRequest
 from Scraper.items import Article
+from scrapy.exceptions import CloseSpider
 
 import re
+from datetime import datetime
 
 
 class BostonGlobeSpider(scrapy.Spider):
@@ -49,10 +51,11 @@ class BostonGlobeSpider(scrapy.Spider):
 	def parse_article(self, response):
 		article = Article()
 
-		date = response.css('div#header-container div.article span.datetime span.date::text').getall()
-		
+		date = response.css('div#header-container div.article span.datetime span.date::text').get().replace('Updated ', '')
+		time = response.css('div#header-container div.article span.datetime span.time::text').get().replace('.', '')
+
 		try:
-			year = int(date[-1].replace(', ', ' ').split(' ')[-2])
+			year = int(date.replace(', ', ' ').split(' ')[-2])
 		except:
 			year = 2019
 
@@ -65,7 +68,7 @@ class BostonGlobeSpider(scrapy.Spider):
 			
 			article['author'] = response.css('div#header-container div.article div.authors span.author span.bold:not(.seperator)::text').getall()
 			
-			article['date'] = response.css('div#header-container div.article span.datetime span::text').getall()
+			article['date'] = str(datetime.strptime(''.join([date, time]), '%B %d, %Y, %I:%M %p'))
 			
 			article['body'] = ' '.join(response.css('div.article p.paragraph span::text').getall())
 

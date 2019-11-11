@@ -3,6 +3,8 @@ import scrapy
 from scrapy_splash import SplashRequest
 from Scraper.items import Article
 
+from datetime import datetime
+
 
 class WburSpider(scrapy.Spider):
 	name = 'wbur'
@@ -56,8 +58,9 @@ class WburSpider(scrapy.Spider):
 		
 		article['source'] = response.url.split('/')[3]
 		
-		article['date'] = response.css('header.article-section--title div.article-meta span.article-meta-item--date span::text').get()
-		
+		date = response.css('header.article-section--title div.article-meta span.article-meta-item--date span::text').get()
+		article['date'] = str(datetime.strptime(date, '%B %d, %Y'))
+
 		article['author'] = response.css('header.article-section--title div.article-meta li.article-meta-item--author a::text').getall()
 		
 		article['body'] = ' '.join(response.css('div#root div.surface section.article-section--content p::text').getall())
