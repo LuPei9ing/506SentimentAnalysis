@@ -22,7 +22,12 @@ class Article(scrapy.Item):
 	author = scrapy.Field()
 	category = scrapy.Field()
 	page_number = scrapy.Field()
+	summary = scrapy.Field()
 	body = scrapy.Field()
 	source = scrapy.Field()
 	media = scrapy.Field()
 	tags = scrapy.Field()
+
+
+class WaybackDates(scrapy.Item):
+	date = scrapy.Field()

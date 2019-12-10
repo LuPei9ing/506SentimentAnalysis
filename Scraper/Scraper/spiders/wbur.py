@@ -20,7 +20,11 @@ class WburSpider(scrapy.Spider):
 		'https://www.wbur.org/cognoscenti/archive/1'
 	]
 
-	year_limit = 2014
+
+	def __init__(self, start_year=0, *args, **kwargs):
+		super(WburSpider, self).__init__(*args, **kwargs)
+
+		self.start_year = int(start_year)
 
 
 	def parse(self, response):
@@ -33,8 +37,8 @@ class WburSpider(scrapy.Spider):
 		except:
 			curr_year = 2019
 
-		if curr_year >= self.year_limit:
-			yield scrapy.Request(
+		if curr_year >= self.start_year:
+			yield SplashRequest(
 				url = '/'.join(curr_url[:-1]) + '/' + str(next_page), 
 				callback = self.parse
 			)
@@ -52,6 +56,8 @@ class WburSpider(scrapy.Spider):
 		article = Article()
 
 
+		article['url'] = response.url
+
 		article['title'] = response.css('head title::text').get()
 		
 		article['journal'] = 'WBUR'
@@ -63,6 +69,8 @@ class WburSpider(scrapy.Spider):
 
 		article['author'] = response.css('header.article-section--title div.article-meta li.article-meta-item--author a::text').getall()
 		
+		article['summary'] = response.css('head meta[name="description"]::attr(content)').get()
+
 		article['body'] = ' '.join(response.css('div#root div.surface section.article-section--content p::text').getall())
 
 		article['media'] = response.css('article.article img::attr(src)').getall()

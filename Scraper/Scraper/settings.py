@@ -33,6 +33,8 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'Scraper (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0'
+
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -74,29 +76,24 @@ SPLASH_COOKIES_DEBUG = True
 #}
 
 
-'''
-# ROTATING USER AGENTS
 
-DOWNLOADER_MIDDLEWARES = {
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
-}
+# # ROTATING USER AGENTS
+# DOWNLOADER_MIDDLEWARES = {
+#     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+#     'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+# }
+# # /ROTATING USER AGENTS
 
-# /ROTATING USER AGENTS
+# # PROXY POOL
+# PROXY_POOL_ENABLED = True
+# DOWNLOADER_MIDDLEWARES = {
+#     # ...
+#     'scrapy_proxy_pool.middlewares.ProxyPoolMiddleware': 610,
+#     'scrapy_proxy_pool.middlewares.BanDetectionMiddleware': 620,
+#     # ...
+# }
+# # /PROXY POOL
 
-
-# PROXY POOL
-
-PROXY_POOL_ENABLED = True
-DOWNLOADER_MIDDLEWARES = {
-    # ...
-    'scrapy_proxy_pool.middlewares.ProxyPoolMiddleware': 610,
-    'scrapy_proxy_pool.middlewares.BanDetectionMiddleware': 620,
-    # ...
-}
-
-# /PROXY POOL
-'''
 
 
 # Enable or disable extensions

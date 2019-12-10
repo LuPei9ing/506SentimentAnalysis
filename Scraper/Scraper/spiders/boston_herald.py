@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from Scraper.items import Article
-from scrapy.exceptions import CloseSpider
 
 import re
 from datetime import datetime
@@ -14,7 +13,11 @@ class BostonHeraldSpider(scrapy.Spider):
 	allowed_domains = ['www.bostonherald.com']
 	start_urls = ['https://www.bostonherald.com']
 
-	year_limit = 2014
+
+	def __init__(self, start_year=0, *args, **kwargs):
+		super(BostonHeraldSpider, self).__init__(*args, **kwargs)
+
+		self.start_year = start_year
 
 
 	def parse(self, response):
@@ -37,6 +40,9 @@ class BostonHeraldSpider(scrapy.Spider):
 		if next_page is not None or '/page/' in response.url:
 			articles = response.css('div.article-info a.article-title::attr(href)').getall()
 
+			last_date_selector = response.css('div#page div#content div.tag-content article:last-of-type div.article-info time::text').get()
+			last_date = int(last_date_selector.split(' ')[2])
+
 			if next_page:
 				regex = re.search(r'^' + re.escape(self.start_urls[0]) + r'/(.+?)/page.*', next_page)
 			else:
@@ -53,41 +59,43 @@ class BostonHeraldSpider(scrapy.Spider):
 					}
 				)
 
-			yield scrapy.Request(
-				url = next_page, 
-				callback = self.parse_categories
-			)
+			if last_date >= self.start_year:
+				yield scrapy.Request(
+					url = next_page, 
+					callback = self.parse_categories
+				)
 
 
 	def parse_article(self, response):
 		article = Article()
 
 		scraped_datetime = response.css('div.meta div.time time::attr(datetime)').get()
-
-		if self.year_limit is not None and int(scraped_datetime.split('-')[0]) < self.year_limit:
-			raise CloseSpider('Reached Year Limit')
+		year = int(scraped_datetime.split('-')[0])
 
 
-		article['url'] = response.url
-		
-		article['title'] = response.css('head title::text').get()
-		
-		article['date'] = str(datetime.strptime(scraped_datetime, '%Y-%d-%m %H:%M:%S'))
-		
-		article['journal'] = 'Boston Herald'
+		if year >= self.start_year:
+			article['url'] = response.url
+			
+			article['title'] = response.css('head title::text').get()
+			
+			article['date'] = scraped_datetime
+			
+			article['journal'] = 'Boston Herald'
 
-		article['author'] =  response.css('div.by-line a.author-name::text').get()
-		
-		article['category'] = response.meta['category']
-		
-		article['body'] = ' '.join(response.css('div.body-copy p::text').getall())
-		
-		article['tags'] = response.css('div.tags li a::text').getall()
+			article['author'] = response.css('div#page div#content article div.article-content div.header-features div.meta div.byline a.author-name::text').get()
+			
+			article['category'] = response.meta['category']
 
-		article['media'] = response.css('div#content main#main article div.article-content img::attr(src)').getall()
+			article['summary'] = response.css('head meta[name="description"]::attr(content)').get()
+			
+			article['body'] = ' '.join(response.css('div.body-copy p::text').getall())
+			
+			article['tags'] = response.css('div.tags ul li a::text').getall()
+
+			article['media'] = response.css('div#content main#main article div.article-content img::attr(src)').getall()
 
 
-		yield(article)
+			yield(article)
 
 
 
