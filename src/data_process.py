@@ -91,7 +91,7 @@ def doc2vec(words):
         count+=1
     # model = Doc2Vec(doc, min_count=1, iter=20, workers=5)
     # model.save("word2vec.model")
-    model = Doc2Vec.load("doc2vec.bin")
+    model = Doc2Vec.load("./Models/doc2vec.bin")
     sents = []
     vec = []
     for w in words:
